@@ -1,0 +1,7 @@
+# Ignore expressions
+
+node_modules/
+
+# PyCharm
+.idea/
+

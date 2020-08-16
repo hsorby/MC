@@ -2,7 +2,7 @@
     <div class="getfile">
         <title>Upload new File Test</title>
         <h1>Upload new File</h1>
-        <form method=post action="http://127.0.0.1:5000/upload" enctype=multipart/form-data>
+        <form method=post :action="uploadUrl" enctype=multipart/form-data>
             <input type=file name=file>
             <input type=submit value=Upload>
         </form>
@@ -11,7 +11,12 @@
 
 <script>
 export default {
-    name: 'GetFile'
+    name: 'GetFile',
+    computed: {
+        uploadUrl() {
+            return 'http://127.0.0.1:5000/upload'
+        }
+    }
 }
 </script>
 

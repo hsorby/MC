@@ -2,11 +2,7 @@
     <div id="app">
         <div id="startingPage">
             <h1>Map Client</h1>
-            <p>"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod 
-            tempor incididunt ut labore et dolore magna aliqua. Ut enim ad <br>minim veniam, quis nostrud exercitation ullamco laboris nisi 
-            ut aliquip ex ea commodo consequat. Duis aute irure <br>dolor in reprehenderit in voluptate velit esse cillum dolore eu 
-            fugiat nulla pariatur.<br> Excepteur sint occaecat cupidatat
-             non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."</p>
+            <upload-file></upload-file>
              <br>
              <GetDemographics /><br><br>
             <GetFile />
@@ -24,44 +20,16 @@
 import GetFile from './components/GetFile.vue'
 import Essential from './components/Essential.vue'
 import GetDemographics from './components/GetDemographics.vue'
+import UploadFile from '@/components/UploadFile.vue'
 
-
-import $ from 'jquery'
 export default {
     name: 'App',
     components: {
         GetFile,
         Essential,
         GetDemographics,
+        UploadFile,
     },
-    methods: {
-        async goToNonEssential() {
-            $("button").click(function() {
-                $('html,body').animate({
-                        scrollTop: $("#nonEssential").offset().top
-                    },
-                    'slow');
-            });
-        },
-
-        async goToEssential() {
-            $("button").click(function() {
-                $('html,body').animate({
-                        scrollTop: $("#essential").offset().top
-                    },
-                    'slow');
-            });
-        },
-
-        async goToTracking() {
-            $("button").click(function() {
-                $('html,body').animate({
-                        scrollTop: $("#tracking").offset().top
-                    },
-                    'slow');
-            });
-        },
-    }
 }
 </script>
 

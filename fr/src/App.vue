@@ -1,59 +1,106 @@
 <template>
-    <div id="app">
-        <div id="startingPage">
-            <h1>Map Client</h1>
-            <upload-file></upload-file>
-             <br>
-             <GetDemographics /><br><br>
-            <GetFile />
-           
-        </div>
-        <div id="body">
-                <div id="essential">
-                    <Essential />
-                </div>
-        </div>
+  <div id="app">
+    <div id="main-page">
+      <h1>MAP Client</h1>
+      <div class="source-creation">
+        <upload-file @upload-success="fileAdded = !fileAdded"></upload-file>
+        <div class="spacer"></div>
+        <create-demographic
+          @created-demographic="demographicCreated = !demographicCreated"
+        ></create-demographic>
+      </div>
+      <div class="input-selection">
+        <available-files
+          :updateFileListing="fileAdded"
+          @input="currentFile = $event"
+        ></available-files>
+        <div class="spacer"></div>
+        <available-demographics
+          :updateDemographicsListing="demographicCreated"
+          @input="currentDemographic = $event"
+        ></available-demographics>
+      </div>
+      <div class="marker-selection">
+        <select-markers
+          :file="currentFile"
+          @essential-markers="essentialMarkers = $event"
+          @tracking-markers="trackingMarkers = $event"
+        ></select-markers>
+      </div>
+      <div class="process">
+        <process-data
+          :demographic="currentDemographic"
+          :essentialMarkers="essentialMarkers"
+          :trackingMarkers="trackingMarkers"
+          :file="currentFile"
+        ></process-data>
+      </div>
     </div>
+  </div>
 </template>
 
 <script>
-import GetFile from './components/GetFile.vue'
-import Essential from './components/Essential.vue'
-import GetDemographics from './components/GetDemographics.vue'
 import UploadFile from '@/components/UploadFile.vue'
+import CreateDemographic from '@/components/CreateDemographic.vue'
+import AvailableFiles from '@/components/AvailableFiles.vue'
+import AvailableDemographics from '@/components/AvailableDemographics.vue'
+import SelectMarkers from '@/components/SelectMarkers.vue'
+import ProcessData from '@/components/ProcessData.vue'
+
+import 'vue-select/dist/vue-select.css'
 
 export default {
-    name: 'App',
-    components: {
-        GetFile,
-        Essential,
-        GetDemographics,
-        UploadFile,
-    },
+  name: 'App',
+  components: {
+    // GetFile,
+    // Essential,
+    // GetDemographics,
+    UploadFile,
+    CreateDemographic,
+    AvailableFiles,
+    AvailableDemographics,
+    SelectMarkers,
+    ProcessData,
+  },
+  data() {
+    return {
+      fileAdded: false,
+      demographicCreated: false,
+      currentFile: {},
+      currentDemographic: {},
+      essentialMarkers: [],
+      trackingMarkers: [],
+    }
+  },
 }
 </script>
 
 <style>
 #app {
-    font-family: Avenir, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-align: center;
-    color: #2c3e50;
-    margin-top: 60px;
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
 }
 
 #nonEssential {
-    width: 100%;
-    height: 700px;
-    background: #E8E8E8;
+  width: 100%;
+  height: 700px;
+  background: #e8e8e8;
 }
 
-#startingPage {
-    height: 500px;
+.source-creation,
+.input-selection {
+  display: flex;
 }
 
+.trc-container {
+  flex: 1;
+}
 
-
-
+.spacer {
+  flex: 0.2;
+}
 </style>

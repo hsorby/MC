@@ -1,72 +1,59 @@
 <template>
-  <div class="container">
-    <!--UPLOAD-->
-    <form enctype="multipart/form-data" novalidate v-if="isInitial || isSaving">
-      <h1>Upload file</h1>
+  <div class="upload-files">
+    <h2>Upload file</h2>
+    <form enctype="multipart/form-data" novalidate>
       <div class="dropbox">
         <input
           type="file"
+          accept=".trc,text/plain"
           :name="uploadFieldName"
           :disabled="isSaving"
           @change="onChange"
-          accept="text/plain"
           class="input-file"
         />
         <p v-if="isInitial">
-          Drag your file(s) here to begin<br />
+          Drag your file(s) here to upload<br />
           or click to browse
         </p>
-        <p v-if="isSaving">Uploading {{ fileCount }} files...</p>
+        <p v-if="isSaving">Uploading {{ fileCount }} file(s) ...<br />
+        Progress ({{ resolvedCount }} / {{ fileCount }})</p>
       </div>
     </form>
   </div>
 </template>
 
 <script>
-import { upload } from '@/services/FileUpload'
+import { upload } from '@/services/BackendAPI'
 
 const STATUS_INITIAL = 0,
-  STATUS_SAVING = 1,
-  STATUS_SUCCESS = 2,
-  STATUS_FAILED = 3
+  STATUS_SAVING = 1
 
 export default {
   name: 'UploadFile',
   data() {
     return {
-      uploadedFiles: [],
-      uploadError: null,
       currentStatus: null,
-      uploadFieldName: 'photos',
+      uploadFieldName: 'trcs',
       fileCount: 0,
+      resolvedCount: 0,
     }
   },
   computed: {
     isInitial() {
-      console.log('is initial')
       return this.currentStatus === STATUS_INITIAL
     },
     isSaving() {
-      console.log('is saving')
       return this.currentStatus === STATUS_SAVING
-    },
-    isSuccess() {
-      return this.currentStatus === STATUS_SUCCESS
-    },
-    isFailed() {
-      return this.currentStatus === STATUS_FAILED
     },
   },
   methods: {
     reset() {
       // reset form to initial state
       this.currentStatus = STATUS_INITIAL
-      this.uploadedFiles = []
-      this.uploadError = null
+      this.resolvedCount = 0
     },
     onChange(event) {
-      console.log('this has changed.', event)
-      this.filesChange(event.target.name, event.target.files)
+      this.filesChanged(event.target.name, event.target.files)
       this.fileCount = event.target.files.length
     },
     save(formData) {
@@ -75,28 +62,32 @@ export default {
 
       upload(formData)
         .then((x) => {
-          console.log('something uploaded!')
-          this.uploadedFiles = [].concat(x)
-          this.currentStatus = STATUS_SUCCESS
+          this.$emit('upload-success', x)
+          this.resolvedCount += 1
+          if (this.resolvedCount === this.fileCount) {
+            this.reset()
+          }
         })
         .catch((err) => {
-          this.uploadError = err.response
-          this.currentStatus = STATUS_FAILED
+          this.$emit('upload-failed', err)
+          this.resolvedCount += 1
+          if (this.resolvedCount === this.fileCount) {
+            this.reset()
+          }
         })
     },
-    filesChange(fieldName, fileList) {
+    filesChanged(fieldName, fileList) {
       // handle file changes
-      const formData = new FormData()
-
-      if (!fileList.length) return
-
-      // append the files to FormData
       Array.from(Array(fileList.length).keys()).map((x) => {
-        formData.append(fieldName, fileList[x], fileList[x].name)
+        fileList[x].text().then((content) => {
+          const requestContent = {
+            ['fileName']: fileList[x].name,
+            ['fileContent']: content,
+          }
+          const stringContent = JSON.stringify(requestContent)
+          this.save(stringContent)
+        })
       })
-
-      // save it
-      this.save(formData)
     },
   },
   mounted() {
@@ -135,5 +126,9 @@ export default {
   font-size: 1.2em;
   text-align: center;
   padding: 50px 0;
+}
+
+.upload-files {
+  flex: 1;
 }
 </style>

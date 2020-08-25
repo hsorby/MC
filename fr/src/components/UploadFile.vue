@@ -69,7 +69,7 @@ export default {
           }
         })
         .catch((err) => {
-          this.$emit('upload-failed', err)
+          this.$alert(err.message, 'Upload file(s) error', 'error')
           this.resolvedCount += 1
           if (this.resolvedCount === this.fileCount) {
             this.reset()

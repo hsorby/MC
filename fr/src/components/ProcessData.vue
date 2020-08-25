@@ -68,6 +68,8 @@ export default {
         this.jobs = this.jobs.filter(function(item) {
           return data.id !== item.id
         })
+      }).catch(err => {
+        this.$alert(err.message, 'Process data failed', 'error')
       })
     },
     createJob() {

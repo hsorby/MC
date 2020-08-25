@@ -44,6 +44,8 @@ export default {
     fetchFiles() {
       getAvailableFiles().then(data => {
         this.fileListing = data.files
+      }).catch(err => {
+        this.$alert(err.message, 'Fetch files error', 'error')
       })
     },
     setSelected(value) {

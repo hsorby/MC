@@ -44,6 +44,8 @@ export default {
     fetchDemographics() {
       getAvailableDemographics().then(data => {
         this.demographicsListing = data.demographics
+      }).catch(err => {
+        this.$alert(err.message, 'Fetch demographics error', 'error')
       })
     },
     setSelected(value) {

@@ -63,6 +63,8 @@ export default {
         this.markers = data.markers
         this.essentialMarkers = data.markers
         this.trackingMarkers = data.markers
+      }).catch(err => {
+        this.$alert(err.message, 'Get markers error', 'error')
       })
     },
     calculateLeftovers(selected) {

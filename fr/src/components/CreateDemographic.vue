@@ -68,7 +68,7 @@ export default {
         this.$emit('created-demographic', response)
         this.reset()
       }).catch(err => {
-        console.log('create demographic failed:', err.message)
+        this.$alert(err.message, 'Create demograhpic error', 'error')
         this.reset()
       })
     }

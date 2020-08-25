@@ -1,6 +1,8 @@
 # Ignore expressions
 
 node_modules/
+database/
+dist/
 
 # PyCharm
 .idea/
@@ -14,4 +16,6 @@ __pycache__/
 *$py.class
 
 .env.local
+
+.DS_Store
 

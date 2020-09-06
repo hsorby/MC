@@ -6,7 +6,10 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json; charset=utf-8',
   },
-  timeout: 10000,
+  timeout: 60000,
+  // Cap the maximum content length we'll accept to 10MBs, just in case
+  // This should be matched on the production server as well!
+  maxContentLength: 10 * 1024 * 1024
 })
 
 const upload = async (formData, fileName, callbackFunction) => {

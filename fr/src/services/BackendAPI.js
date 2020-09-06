@@ -9,9 +9,14 @@ const apiClient = axios.create({
   timeout: 10000,
 })
 
-const upload = async (formData, callbackFunction) => {
+const upload = async (formData, fileName, callbackFunction) => {
   const response = await apiClient.post('upload', formData, {
-    onUploadProgress: callbackFunction
+    onUploadProgress: (progressEvent) => {
+      callbackFunction(progressEvent, fileName)
+    },
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
   })
   return response.data
 }

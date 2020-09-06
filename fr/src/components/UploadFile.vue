@@ -10,6 +10,7 @@
           :disabled="isSaving"
           @change="onChange"
           class="input-file"
+          ref="fileInput"
         />
         <p v-if="isInitial">
           Drag your file(s) here to upload<br />
@@ -46,6 +47,7 @@ export default {
       fileCount: 0,
       resolvedCount: 0,
       progressTotal: 100,
+      progressTracking: {},
       progress: 0,
     }
   },
@@ -57,7 +59,8 @@ export default {
       return this.currentStatus === STATUS_SAVING
     },
     progressValue() {
-      return ((100.0 * this.progress) / this.progressTotal).toFixed(1)
+      const total = this.progressTotal == 0 ? 1 : this.progressTotal
+      return ((100.0 * this.progress) / total).toFixed(1)
     },
   },
   methods: {
@@ -65,22 +68,38 @@ export default {
       // reset form to initial state
       this.currentStatus = STATUS_INITIAL
       this.resolvedCount = 0
+      this.progressTotal = 0
+      this.progressTracking = {}
+      this.progress = 0
     },
-    onChange(event) {
-      this.filesChanged(event.target.name, event.target.files)
-      this.fileCount = event.target.files.length
+    onChange() {
+      const inputFiles = this.$refs.fileInput.files
+
+      this.fileCount = inputFiles.length
+      for (var i = 0; i < inputFiles.length; i++) {
+        const file = inputFiles[i]
+        let formData = new FormData()
+        formData.append('file', file)
+        this.save(formData, file.name)
+      }
+      this.$refs.fileInput.value = ''
     },
-    onUploadProgress(event) {
+    onUploadProgress(event, fileName) {
       if (event.lengthComputable) {
-        this.progressTotal = event.total
-        this.progress = event.loaded
+        if ({}.hasOwnProperty.call(this.progressTracking, fileName)) {
+          this.progressTracking[fileName] = (100.0 * event.loaded) / event.total
+        } else {
+          this.progressTracking[fileName] = (100.0 * event.loaded) / event.total
+          this.progressTotal += event.total
+        }
+        this.progress += event.loaded
       }
     },
-    save(formData) {
+    save(formData, fileName) {
       // upload data to the server
       this.currentStatus = STATUS_SAVING
 
-      upload(formData, this.onUploadProgress)
+      upload(formData, fileName, this.onUploadProgress)
         .then((x) => {
           this.$emit('upload-success', x)
           this.resolvedCount += 1
@@ -93,23 +112,11 @@ export default {
         .catch((err) => {
           this.$alert(err.message, 'Upload file(s) error', 'error')
           this.resolvedCount += 1
+          console.log(this.files)
           if (this.resolvedCount === this.fileCount) {
             this.reset()
           }
         })
-    },
-    filesChanged(fieldName, fileList) {
-      // handle file changes
-      Array.from(Array(fileList.length).keys()).map((x) => {
-        fileList[x].text().then((content) => {
-          const requestContent = {
-            ['fileName']: fileList[x].name,
-            ['fileContent']: content,
-          }
-          const stringContent = JSON.stringify(requestContent)
-          this.save(stringContent)
-        })
-      })
     },
   },
   mounted() {
@@ -119,10 +126,21 @@ export default {
         CircularProgress,
       },
       render: (h) => {
-        return h('circular-progress', {props: {strokeWidth: 10}, style: {
-    visibility: 'hidden',
-  },}, [h('template', {slot: 'footer'}, [h('p', [h('b', 'Uploading'), h('br'), h('b', 'Progress')])])])
-      } 
+        return h(
+          'circular-progress',
+          {
+            props: { strokeWidth: 10 },
+            style: {
+              visibility: 'hidden',
+            },
+          },
+          [
+            h('template', { slot: 'footer' }, [
+              h('p', [h('b', 'Uploading'), h('br'), h('b', 'Progress')]),
+            ]),
+          ]
+        )
+      },
     })
 
     let instance = new CircularProgressClass({

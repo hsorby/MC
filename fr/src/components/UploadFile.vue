@@ -2,7 +2,7 @@
   <div class="upload-files">
     <h2>Upload file</h2>
     <form enctype="multipart/form-data" novalidate>
-      <div class="dropbox">
+      <div class="dropbox" ref="dropbox">
         <input
           type="file"
           accept=".trc,text/plain"
@@ -15,8 +15,14 @@
           Drag your file(s) here to upload<br />
           or click to browse
         </p>
-        <p v-if="isSaving">Uploading {{ fileCount }} file(s) ...<br />
-        Progress ({{ resolvedCount }} / {{ fileCount }})</p>
+        <p v-if="isSaving">
+          <circular-progress :value="progressValue" :strokeWidth="10">
+            <template v-slot:footer>
+              <b>Uploading</b> {{ fileCount }} file(s) ...<br />
+              <b>Progress</b> ({{ resolvedCount }} / {{ fileCount }})
+            </template>
+          </circular-progress>
+        </p>
       </div>
     </form>
   </div>
@@ -24,18 +30,23 @@
 
 <script>
 import { upload } from '@/services/BackendAPI'
+import CircularProgress from '@/components/CircularProgress'
+import Vue from 'vue'
 
 const STATUS_INITIAL = 0,
   STATUS_SAVING = 1
 
 export default {
   name: 'UploadFile',
+  components: { CircularProgress },
   data() {
     return {
       currentStatus: null,
       uploadFieldName: 'trcs',
       fileCount: 0,
       resolvedCount: 0,
+      progressTotal: 100,
+      progress: 0,
     }
   },
   computed: {
@@ -44,6 +55,9 @@ export default {
     },
     isSaving() {
       return this.currentStatus === STATUS_SAVING
+    },
+    progressValue() {
+      return ((100.0 * this.progress) / this.progressTotal).toFixed(1)
     },
   },
   methods: {
@@ -56,16 +70,24 @@ export default {
       this.filesChanged(event.target.name, event.target.files)
       this.fileCount = event.target.files.length
     },
+    onUploadProgress(event) {
+      if (event.lengthComputable) {
+        this.progressTotal = event.total
+        this.progress = event.loaded
+      }
+    },
     save(formData) {
       // upload data to the server
       this.currentStatus = STATUS_SAVING
 
-      upload(formData)
+      upload(formData, this.onUploadProgress)
         .then((x) => {
           this.$emit('upload-success', x)
           this.resolvedCount += 1
           if (this.resolvedCount === this.fileCount) {
-            this.reset()
+            setTimeout(() => {
+              this.reset()
+            }, 2500)
           }
         })
         .catch((err) => {
@@ -92,6 +114,26 @@ export default {
   },
   mounted() {
     this.reset()
+    const CircularProgressClass = Vue.extend({
+      components: {
+        CircularProgress,
+      },
+      render: (h) => {
+        return h('circular-progress', {props: {strokeWidth: 10}, style: {
+    visibility: 'hidden',
+  },}, [h('template', {slot: 'footer'}, [h('p', [h('b', 'Uploading'), h('br'), h('b', 'Progress')])])])
+      } 
+    })
+
+    let instance = new CircularProgressClass({
+      propsData: { strokeWidth: 10 },
+    })
+    instance.$slots.footer = ['First line<br>Second line']
+    instance.$mount() // pass nothing
+    this.$refs.dropbox.appendChild(instance.$el)
+    const minHeight = instance.$el.clientHeight + 10
+    this.$refs.dropbox.removeChild(instance.$el)
+    this.$refs.dropbox.style.minHeight = minHeight + 'px'
   },
 }
 </script>
@@ -103,8 +145,11 @@ export default {
   background: lightcyan;
   color: dimgray;
   padding: 10px 10px;
-  min-height: 200px; /* minimum height */
+  min-height: 100px; /* minimum height */
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
 }
 
@@ -125,7 +170,7 @@ export default {
 .dropbox p {
   font-size: 1.2em;
   text-align: center;
-  padding: 50px 0;
+  border: 0;
 }
 
 .upload-files {

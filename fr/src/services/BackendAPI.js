@@ -9,8 +9,10 @@ const apiClient = axios.create({
   timeout: 10000,
 })
 
-const upload = async (formData) => {
-  const response = await apiClient.post('upload', formData)
+const upload = async (formData, callbackFunction) => {
+  const response = await apiClient.post('upload', formData, {
+    onUploadProgress: callbackFunction
+  })
   return response.data
 }
 
@@ -34,8 +36,20 @@ const getMarkers = async (hash) => {
   return response.data
 }
 
-const processData = async (id, file, demographic, essentialMarkers, trackingMarkers) => {
-  const response = await apiClient.post('process', {id, file, demographic, essentialMarkers, trackingMarkers})
+const processData = async (
+  id,
+  file,
+  demographic,
+  essentialMarkers,
+  trackingMarkers
+) => {
+  const response = await apiClient.post('process', {
+    id,
+    file,
+    demographic,
+    essentialMarkers,
+    trackingMarkers,
+  })
   return response.data
 }
 

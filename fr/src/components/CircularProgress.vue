@@ -73,6 +73,7 @@ export default {
       number: 0,
       dec: '0',
       stepSize: 10,
+      intervalTargetNumber: 0,
     }
   },
   computed: {
@@ -101,6 +102,7 @@ export default {
         return
       }
       const intervalStartingPoint = this.number
+      this.intervalTagetNumber = number
       const valueInterval = number - this.number
       const valueStepSize = valueInterval / this.stepSize
       const interval = this.transitionDuration / this.stepSize
@@ -111,12 +113,12 @@ export default {
           this.number = number
           window.clearInterval(this.numberInterval)
         }
-        this.displayNumber(this.number)
+        this.displayNumber()
         counter++
       }, interval)
     },
-    displayNumber(number) {
-      let [int, dec] = number.toFixed(this.precision).split('.')
+    displayNumber() {
+      let [int, dec] = this.number.toFixed(this.precision).split('.')
       this.int = Number(int)
       this.dec = Number.isNaN(Number(dec)) ? 0 : dec
     },
@@ -142,6 +144,10 @@ export default {
     value: {
       handler: function(v) {
         this.clearHandlers()
+        if (this.number < this.intervalTargetNumber) {
+          this.number = this.intervalTargetNumber
+          this.displayNumber()
+        }
         this.animateValue(v)
       },
       immediate: true,

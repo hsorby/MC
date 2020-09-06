@@ -39,126 +39,116 @@ export default {
   props: {
     strokeWidth: {
       type: Number,
-      default: 4
+      default: 4,
     },
     radius: {
       type: Number,
-      default: 38
+      default: 38,
     },
     transitionDuration: {
       type: Number,
-      default: 1000
+      default: 1000,
     },
     strokeColor: {
       type: String,
-      default: "#aaff00"
+      default: '#aaff00',
+    },
+    precision: {
+      type: Number,
+      default: 1,
     },
     value: {
       validator: function(value) {
-        // should be a number and less or equal than 100
-        return !Number.isNaN(Number(value)) && Number(value) <= 100;
+        // should be a number and between 0 and 100 inclusive
+        return !Number.isNaN(value) && 0 <= value <= 100
       },
-      default: "0.0"
-    }
+      type: Number,
+      default: 0.0,
+    },
   },
   data() {
     return {
-      offset: "",
+      offset: '',
       int: 0,
-      dec: "0"
-    };
+      number: 0,
+      dec: '0',
+      stepSize: 10,
+    }
   },
   computed: {
     circumference() {
-      return this.radius * Math.PI * 2;
+      return this.radius * Math.PI * 2
     },
     fileStyle() {
       return {
         strokeDashoffset: this.offset,
-        "--initialStroke": this.circumference,
-        "--transitionDuration": `${this.transitionDuration}ms`,
-        "stroke-width": this.strokeWidth,
-        stroke: this.strokeColor
-      };
+        '--initialStroke': this.circumference,
+        '--transitionDuration': `${this.transitionDuration}ms`,
+        'stroke-width': this.strokeWidth,
+        stroke: this.strokeColor,
+      }
     },
     circleSize() {
-      return (this.radius + this.strokeWidth) * 2;
+      return (this.radius + this.strokeWidth) * 2
     },
     centralP() {
-      return this.circleSize / 2;
-    }
+      return this.circleSize / 2
+    },
   },
   methods: {
-    increaseNumber(number, className) {
+    increaseNumber(number) {
       if (number == 0) {
-        return;
+        return
       }
-      const innerNum = parseInt(
-        this.findClosestNumber(this.transitionDuration / 10, number)
-      );
-      let interval = this.transitionDuration / innerNum;
-      let counter = 0;
-      const handlerName = `${className}Interval`;
-      this[handlerName] = setInterval(() => {
-        const bitDiff = number.toString().length - innerNum.toString().length;
-        if (bitDiff == 0) {
-          this[className] = counter;
-        } else {
-          this[className] = counter * 10 * bitDiff;
+      const intervalStartingPoint = this.number
+      const valueInterval = number - this.number
+      const valueStepSize = valueInterval / this.stepSize
+      const interval = this.transitionDuration / this.stepSize
+      let counter = 0
+      this.numberInterval = setInterval(() => {
+        this.number = intervalStartingPoint + counter * valueStepSize
+        if (counter === this.stepSize) {
+          this.number = number
+          window.clearInterval(this.numberInterval)
         }
-        if (counter === innerNum) {
-          // back to original precision
-          this[className] = number;
-          window.clearInterval(this[handlerName]);
-        }
-        counter++;
-      }, interval);
+        this.displayNumber(this.number)
+        counter++
+      }, interval)
     },
-    findClosestNumber(bound, value) {
-      if (value <= bound) {
-        return value;
-      }
-      return this.findClosestNumber(bound, value / 10);
+    displayNumber(number) {
+      let [int, dec] = number.toFixed(this.precision).split('.')
+      this.int = Number(int)
+      this.dec = Number.isNaN(Number(dec)) ? 0 : dec
     },
-    countNumber(v) {
-      this.offset = "";
+    animateValue(v) {
       this.initTimeoutHandler = setTimeout(() => {
-        this.offset = (this.circumference * (100 - v)) / 100;
-      }, 100);
-      if (this.$slots.default) return;
-      let [int, dec] = v.toString().split(".");
-      // fallback for NaN
-      [int, dec] = [Number(int), Number(dec)];
-      this.increaseNumber(int, "int");
-      this.increaseNumber(Number.isNaN(dec) ? 0 : dec, "dec");
+        this.offset = (this.circumference * (100 - v)) / 100
+      }, 100)
+      if (this.$slots.default) {
+        return
+      }
+      this.increaseNumber(v)
     },
     clearHandlers() {
       if (this.initTimeoutHandler) {
-        clearTimeout(this.initTimeoutHandler);
+        clearTimeout(this.initTimeoutHandler)
       }
-      if (this.intInterval) {
-        clearInterval(this.intInterval);
+      if (this.numberInterval) {
+        clearInterval(this.numberInterval)
       }
-      if (this.decInterval) {
-        clearInterval(this.decInterval);
-      }
-    }
+    },
   },
   watch: {
     value: {
       handler: function(v) {
-        const n = Number(v);
-        if (Number.isNaN(n) || n == 0) {
-          return;
-        }
-        this.clearHandlers();
-        this.countNumber(v);
+        this.clearHandlers()
+        this.animateValue(v)
       },
-      immediate: true
-    }
+      immediate: true,
+    },
   },
   beforeDestroy() {
-    this.clearHandlers();
-  }
-};
+    this.clearHandlers()
+  },
+}
 </script>

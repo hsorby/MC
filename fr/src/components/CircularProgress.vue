@@ -13,7 +13,7 @@
           :cx="centralP"
           :cy="centralP"
           :r="radius"
-          :style="fileStyle"
+          :style="fillStyle"
           class="circle__progress circle__progress--fill"
         ></circle>
       </svg>
@@ -80,7 +80,7 @@ export default {
     circumference() {
       return this.radius * Math.PI * 2
     },
-    fileStyle() {
+    fillStyle() {
       return {
         strokeDashoffset: this.offset,
         '--initialStroke': this.circumference,
@@ -101,21 +101,34 @@ export default {
       if (number == 0) {
         return
       }
-      const intervalStartingPoint = this.number
-      this.intervalTagetNumber = number
-      const valueInterval = number - this.number
-      const valueStepSize = valueInterval / this.stepSize
+      // const intervalStartingPoint = this.number
+      // const valueInterval = 
+      this.intervalTargetNumber = number
+      const intervalValueStepSize = (number - this.number) / this.stepSize
       const interval = this.transitionDuration / this.stepSize
-      let counter = 0
       this.numberInterval = setInterval(() => {
-        this.number = intervalStartingPoint + counter * valueStepSize
-        if (counter === this.stepSize) {
-          this.number = number
-          window.clearInterval(this.numberInterval)
-        }
-        this.displayNumber()
-        counter++
+this.number += intervalValueStepSize
+if (this.number >= this.intervalTargetNumber) {
+  this.number = this.intervalTargetNumber
+  window.clearInterval(this.numberInterval)
+}
+this.displayNumber()
       }, interval)
+      // const intervalStartingPoint = this.number
+      // this.intervalTagetNumber = number
+      // const valueInterval = number - this.number
+      // const valueStepSize = valueInterval / this.stepSize
+      // const interval = this.transitionDuration / this.stepSize
+      // let counter = 0
+      // this.numberInterval = setInterval(() => {
+      //   this.number = intervalStartingPoint + counter * valueStepSize
+      //   if (counter === this.stepSize) {
+      //     this.number = number
+      //     window.clearInterval(this.numberInterval)
+      //   }
+      //   this.displayNumber()
+      //   counter++
+      // }, interval)
     },
     displayNumber() {
       let [int, dec] = this.number.toFixed(this.precision).split('.')
@@ -123,13 +136,21 @@ export default {
       this.dec = Number.isNaN(Number(dec)) ? 0 : dec
     },
     animateValue(v) {
-      this.initTimeoutHandler = setTimeout(() => {
+      console.log('animate value:', v, this.transitionDuration / this.stepSize)
+      // this.initTimeoutHandler = setTimeout(() => {
         this.offset = (this.circumference * (100 - v)) / 100
-      }, 100)
+        console.log(this.offset, this.circumference, 100 - v)
+      // }, this.transitionDuration / this.stepSize)
       if (this.$slots.default) {
         return
       }
-      this.increaseNumber(v)
+      //this.number = v
+      //this.displayNumber()
+        // if (this.number < this.intervalTargetNumber) {
+        //   this.number = this.intervalTargetNumber
+        //   this.displayNumber()
+        // }
+       this.increaseNumber(v)
     },
     clearHandlers() {
       if (this.initTimeoutHandler) {
@@ -144,10 +165,6 @@ export default {
     value: {
       handler: function(v) {
         this.clearHandlers()
-        if (this.number < this.intervalTargetNumber) {
-          this.number = this.intervalTargetNumber
-          this.displayNumber()
-        }
         this.animateValue(v)
       },
       immediate: true,

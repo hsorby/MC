@@ -60,7 +60,8 @@ export default {
     },
     progressValue() {
       const total = this.progressTotal == 0 ? 1 : this.progressTotal
-      return ((100.0 * this.progress) / total).toFixed(1)
+      const progress = this.progressTotal == 0 ? 0 : this.progress
+      return ((100.0 * progress) / total)
     },
   },
   methods: {
@@ -86,13 +87,14 @@ export default {
     },
     onUploadProgress(event, fileName) {
       if (event.lengthComputable) {
+        let previousLoaded = 0
         if ({}.hasOwnProperty.call(this.progressTracking, fileName)) {
-          this.progressTracking[fileName] = (100.0 * event.loaded) / event.total
+          previousLoaded = this.progressTracking[fileName]
         } else {
-          this.progressTracking[fileName] = (100.0 * event.loaded) / event.total
           this.progressTotal += event.total
         }
-        this.progress += event.loaded
+        this.progress += (event.loaded - previousLoaded)
+        this.progressTracking[fileName] = event.loaded
       }
     },
     save(formData, fileName) {

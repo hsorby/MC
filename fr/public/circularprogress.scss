@@ -23,7 +23,7 @@ $--circular-progress-dec-fz: 0.8rem !default;
     stroke-opacity: 1;
     stroke-dasharray: var(--initialStroke);
     stroke-dashoffset: var(--initialStroke);
-    transition: stroke-dashoffset var(--transitionDuration) ease;
+    // transition: stroke-dashoffset var(--transitionDuration) ease;
   }
 
   .percent {

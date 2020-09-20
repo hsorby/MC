@@ -28,10 +28,6 @@
 </template>
 
 <script>
-// <font-awesome-icon
-//               icon="minus"
-//               title="delete"
-//             ></font-awesome-icon>
 export default {
   name: 'ConversionTable',
   props: {

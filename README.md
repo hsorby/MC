@@ -21,3 +21,8 @@ For windows the equivalent command would be:
 
 You will need to create the directory path to the database.
 The application will create the database at that location on startup.
+
+To launch the backend server use the following command:
+
+ gunicorn -b localhost:3000 -w 2 app:app --reload
+ 

@@ -29,6 +29,11 @@ const createDemographic = async (formData) => {
   return response.data
 }
 
+const createConversion = async (data) => {
+  const response = await apiClient.post('create/conversion', data)
+  return response.data
+}
+
 const getAvailableFiles = async () => {
   const response = await apiClient.get('files')
   return response.data
@@ -36,6 +41,16 @@ const getAvailableFiles = async () => {
 
 const getAvailableDemographics = async () => {
   const response = await apiClient.get('demographics')
+  return response.data
+}
+
+const getAvailableConversions = async (file) => {
+  const response = await apiClient.get('conversions', {
+    params: {
+      hash: file.hash,
+      title: file.title,
+    }
+  })
   return response.data
 }
 
@@ -62,10 +77,12 @@ const processData = async (
 }
 
 export {
-  upload,
+  createConversion,
   createDemographic,
   getAvailableFiles,
+  getAvailableConversions,
   getAvailableDemographics,
   getMarkers,
   processData,
+  upload,
 }

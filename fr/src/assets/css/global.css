@@ -1,0 +1,16 @@
+.btn-sml {
+  font-size: 0.5rem;
+}
+
+.swal2-styled.swal2-error {
+  border: 0;
+  border-radius: 0.25em;
+  background: initial;
+  background-color: #f27474;
+  color: #fff;
+  font-size: 1.0625em;
+}
+
+.modal-open {
+  overflow-y: hidden;
+}

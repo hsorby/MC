@@ -1,0 +1,7 @@
+.modal-mask, .leader-line {
+  z-index: 998;
+}
+
+.apply-button {
+  z-index: 999;
+}

@@ -31,7 +31,7 @@
       <p>
       <label></label>
       <!-- <input type=submit value=Create> -->
-      <button type="submit">Create</button>
+      <button type="submit" class="swal2-confirm swal2-styled">Create</button>
       </p>
     </form>
   </div>

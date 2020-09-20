@@ -1,6 +1,16 @@
 <template>
   <div class="process">
-    <button @click="onProcess" :disabled="!canProcessData">Process</button>
+    <button
+      @click="onProcess"
+      :disabled="!canProcessData"
+      :class="{
+        'swal2-confirm': canProcessData,
+        'swal2-cancel': !canProcessData,
+        'swal2-styled': true,
+      }"
+    >
+      Process
+    </button>
     <template v-if="jobs.length">
       <h3>Processing jobs ...</h3>
       <ul>
@@ -63,14 +73,16 @@ export default {
         this.demographic,
         this.essentialMarkers,
         this.trackingMarkers
-      ).then((data) => {
-        this.$alert(data.message)
-        this.jobs = this.jobs.filter(function(item) {
-          return data.id !== item.id
+      )
+        .then((data) => {
+          this.$alert(data.message)
+          this.jobs = this.jobs.filter(function(item) {
+            return data.id !== item.id
+          })
         })
-      }).catch(err => {
-        this.$alert(err.message, 'Process data failed', 'error')
-      })
+        .catch((err) => {
+          this.$alert(err.message, 'Process data failed', 'error')
+        })
     },
     createJob() {
       this.count += 1

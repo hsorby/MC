@@ -51,14 +51,14 @@ def _load_virtual_markers():
     for mi in range(_osim_markerset.getSize()):
         osim_marker = _osim_markerset.get(mi)
 
-        # create a copy because the markerset and its marers only exists
+        # create a copy because the markerset and its markers only exists
         # in the function
-        _v = opensim.Vec3()
-        osim_marker.getOffset(_v)
+        _v = osim_marker.get_location()
+
         offset = np.array([_v.get(i) for i in range(3)])
         marker = Marker(
                     name=osim_marker.getName(),
-                    bodyname=osim_marker.getBodyName(),
+                    bodyname=osim_marker.getParentFrameName(),
                     offset=offset,
                     )
         markers[marker.name] = marker
@@ -93,7 +93,7 @@ def _add_synthetic_markers(marker, marker_coords):
 
 def _load_marker_offsets():
     """
-    Read from file the offsets between the opensim virtual markers and 
+    Read from file the offsets between the opensim virtual markers and
     their corresponding fieldwork landmarks
     """
     marker_offsets = {}
